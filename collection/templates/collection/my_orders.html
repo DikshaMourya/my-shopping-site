@@ -1,0 +1,99 @@
+<html>
+{% extends 'collection/index.html' %}
+
+{% block content %}
+<style>
+    /* Purana style hata kar ye pura naya yahan daal dein */
+    body { background-color: #f1f3f6; }
+    .order-card { background: #fff; border: 1px solid #dbdbdb; border-radius: 4px; transition: box-shadow 0.2s; margin-bottom: 20px; text-decoration: none; color: inherit; display: block; }
+    .order-card:hover { box-shadow: 0 4px 12px 0 rgba(0,0,0,.1); }
+    
+    /* --- Naya Status Color Code Yahan Se Shuru --- */
+    .status-dot { height: 12px; width: 12px; border-radius: 50%; display: inline-block; margin-right: 8px; }
+    .status-pending { background-color: #ffc107; }   /* Yellow */
+    .status-packed { background-color: #17a2b8; }    /* Cyan */
+    .status-shipped { background-color: #007bff; }   /* Blue */
+    .status-delivered { background-color: #28a745; } /* Green */
+    .status-cancelled { background-color: #dc3545; } /* Red */
+
+    .text-pending { color: #856404; }
+    .text-delivered { color: #155724; }
+    /* --- Yahan Tak --- */
+
+    .product-img { width: 80px; height: 80px; object-fit: contain; }
+
+    /* --- Choti Gaadi Ka Naya Style --- */
+    .truck-moving {
+        display: inline-block;
+        margin-left: 5px;
+        color: #007bff;
+        animation: drive 2s infinite linear;
+    }
+
+    @keyframes drive {
+        0% { transform: translateX(0); }
+        50% { transform: translateX(5px); }
+        100% { transform: translateX(0); }
+    }
+</style>
+
+<div class="container py-5">
+    <h4 class="fw-bold mb-4">My Orders</h4>
+    
+    {% if orders %}
+        {% for order in orders %}
+        <a href="{% url 'order_view' order.id %}" class="order-card p-4">
+            <div class="row align-items-center">
+                <div class="col-md-4 d-flex align-items-center">
+                    {% if order.product.product_image %}
+                        <img src="{{ order.product.product_image.url }}" class="product-img me-3" alt="{{ order.product.name }}">
+                    {% endif %}
+                    <div>
+                        <p class="text-muted small mb-1">ID: #MM{{ order.id }}</p>
+                        <h6 class="fw-bold mb-0 text-truncate" style="max-width: 200px;">{{ order.product.name }}</h6>
+                        <p class="text-muted small mt-1">Qty: {{ order.quantity }}</p>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <h6 class="fw-bold mb-1">₹{{ order.total_amount }}</h6>
+                    <p class="text-muted small">Ordered on: <br><strong>{{ order.ordered_date|date:"d M, Y" }}</strong></p>
+                </div>
+
+                <div class="col-md-3">
+                    <p class="small mb-1 text-muted text-uppercase" style="letter-spacing: 0.5px;">Deliver to:</p>
+                    <h6 class="small fw-bold mb-0">{{ order.customer.user.username|title }}</h6>
+                    <p class="text-muted small mb-0">{{ order.customer.city }}, {{ order.customer.pincode }}</p>
+                </div>
+
+                <div class="col-md-2 text-md-end">
+                    <p class="mb-1 fw-bold">
+                        <span class="status-dot 
+                            {% if order.status == 'Delivered' %}status-delivered
+                            {% elif order.status == 'Shipped' %}status-shipped
+                            {% elif order.status == 'Pending' %}status-pending
+                            {% elif order.status == 'Cancelled' %}status-cancelled
+                            {% else %}status-packed{% endif %}">
+                        </span>
+                        {{ order.status }}
+                        
+                        {% if order.status == 'Shipped' %}
+                            <i class="fas fa-truck truck-moving"></i>
+                        {% endif %}
+                    </p>
+                    <span class="btn btn-sm btn-light border">Details</span>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    {% else %}
+        <div class="text-center bg-white p-5 shadow-sm border rounded">
+            <img src="https://rukminim1.flixcart.com/www/800/800/promos/16/05/2019/d438a32e-765a-4d8b-b4a6-520b560971e8.png" style="width: 200px;" class="mb-4">
+            <h4 class="fw-bold">No Orders Yet!</h4>
+            <p class="text-muted">Explore our collection and start shopping now.</p>
+            <a href="{% url 'index' %}" class="btn btn-primary mt-3 px-5">Go Shopping</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+</html>

@@ -1,0 +1,112 @@
+<html>
+    {% extends 'collection/index.html' %}
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+<div class="container py-5 text-center">
+    <div class="card shadow-sm border-0 p-5 rounded-1" style="background: #fff; max-width: 700px; margin: auto;">
+        <div class="mb-4">
+            <div class="position-relative d-inline-block">
+                <i class="fa fa-check-circle text-success" style="font-size: 80px;"></i>
+                <span style="font-size: 40px; position: absolute; bottom: -10px; right: -10px; animation: bounce 2s infinite;">🎉</span>
+            </div>
+        </div>
+        
+        <h2 class="fw-bold text-dark mb-3">Order Placed Successfully! ✅</h2>
+        <p class="text-muted fs-5">Thank you for shopping with My-Mart. Your order has been received and is being processed. 🚚</p>
+        
+        <div class="mt-4 p-3 rounded-2" style="background-color: #f8f0ff; display: inline-block; border: 1px solid #e9d5ff;">
+            <p class="fw-bold mb-0">📦 Order ID: <span style="color: #7414a0;">#MM1000789</span></p>
+        </div>
+
+        <hr class="my-4 mx-auto" style="width: 50%; border-top: 1px dashed #ddd;">
+
+        <div class="d-flex flex-wrap justify-content-center gap-3 mt-4">
+            <a href="{% url 'index' %}" class="btn btn-theme-outline px-4 py-2 fw-bold text-uppercase">
+                🛍️ Continue Shopping
+            </a>
+            <a href="{% url 'my_orders' %}" class="btn btn-theme-filled px-4 py-2 fw-bold text-uppercase">
+                📄 View My Orders
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    body { background-color: #f1f3f6 !important; }
+    
+    .btn-theme-filled {
+        background-color: #7414a0 !important;
+        color: white !important;
+        border: 2px solid #7414a0 !important;
+        border-radius: 2px !important;
+        transition: 0.3s;
+    }
+    .btn-theme-filled:hover { background-color: #600e85 !important; transform: translateY(-2px); }
+
+    .btn-theme-outline {
+        background-color: transparent !important;
+        color: #7414a0 !important;
+        border: 2px solid #7414a0 !important;
+        border-radius: 2px !important;
+        transition: 0.3s;
+    }
+    .btn-theme-outline:hover { background-color: #7414a0 !important; color: white !important; transform: translateY(-2px); }
+
+    /* Animations */
+    .fa-check-circle { animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    @keyframes scaleIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+    @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-10px);} 60% {transform: translateY(-5px);} }
+</style>
+
+<script>
+    window.onload = function() {
+        var duration = 5 * 1000;
+        var animationEnd = Date.now() + duration;
+        var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
+
+        function randomInRange(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
+        var interval = setInterval(function() {
+            var timeLeft = animationEnd - Date.now();
+
+            if (timeLeft <= 0) {
+                return clearInterval(interval);
+            }
+
+            var particleCount = 50 * (timeLeft / duration);
+            
+            // 1. सितारों वाला धमाका (Stars)
+            confetti(Object.assign({}, defaults, { 
+                particleCount, 
+                origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
+                shapes: ['star'],
+                colors: ['#ffd700', '#ff00ff', '#7414a0'] 
+            }));
+
+            // 2. नॉर्मल कंफेट्टी (Paper circles)
+            confetti(Object.assign({}, defaults, { 
+                particleCount, 
+                origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
+                shapes: ['circle'],
+                colors: ['#ffffff', '#7414a0', '#00d4ff']
+            }));
+        }, 250);
+
+        // अंत में एक बड़ा फाइनल धमाका
+        setTimeout(() => {
+            confetti({
+                particleCount: 150,
+                spread: 70,
+                origin: { y: 0.6 },
+                scalar: 2, // टुकड़ों का साइज बड़ा करने के लिए
+                shapes: ['star', 'circle']
+            });
+        }, 500);
+    };
+</script>
+{% endblock %}
+</html>

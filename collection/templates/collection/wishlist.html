@@ -1,0 +1,80 @@
+<html>
+    {% extends 'collection/index.html' %} {% block content %}
+    <style>
+    /* Heart button ko card ke upar sahi se dikhane ke liye */
+    .wishlist-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: white;
+        border: none;
+        border-radius: 50%;
+        width: 35px;
+        height: 35px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        z-index: 5;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+    
+    .wishlist-btn.active i {
+        color: #ff4757; /* Red color for active heart */
+    }
+
+    .wishlist-btn:hover {
+        transform: scale(1.1);
+    }
+</style>
+<div class="container mt-4">
+    <div class="bg-white p-3 shadow-sm mb-4 d-flex justify-content-between align-items-center rounded">
+        <h4 class="mb-0 fw-bold"><i class="fas fa-heart text-danger me-2"></i>My Wishlist</h4>
+    </div>
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3 mb-5">
+        {% for item in wishlist_items %}
+        <div class="col" id="wishlist-item-{{ item.product.id }}">
+            <div class="card product-card shadow-sm p-2">
+                <button class="wishlist-btn active" onclick="toggleWishlist(this, '{{ item.product.id }}')">
+                    <i class="fas fa-heart"></i>
+                </button>
+                
+                <a href="{% url 'product_detail' item.product.id %}" class="text-decoration-none text-dark">
+                    <div class="product-img-container">
+                        {% if item.product.image %}<img src="{{ item.product.image.url }}" class="product-img">{% endif %}
+                    </div>
+                    <div class="card-body p-2 text-start">
+                        <h6 class="card-title text-truncate mb-1">{{ item.product.name }}</h6>
+                        <p class="price-tag mb-0">₹{{ item.product.selling_price }}</p>
+                        <div class="view-detail-btn">VIEW DETAILS <i class="fa fa-chevron-right ms-1"></i></div>
+                    </div>
+                </a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5 bg-white rounded shadow-sm">
+            <i class="fas fa-heart-broken fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">Aapki wishlist khaali hai!</h5>
+            <a href="{% url 'index' %}" class="btn btn-primary mt-3" style="background:#7414a0; border:none;">Shopping Karein</a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    // Wishlist se turant hatane ke liye function
+    function toggleWishlist(btn, productId) {
+        fetch(`/toggle-wishlist/?id=${productId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'removed') {
+                    // Page se us product ka card gayab kar do
+                    document.getElementById(`wishlist-item-${productId}`).remove();
+                }
+            });
+    }
+</script>
+{% endblock %}
+</html>

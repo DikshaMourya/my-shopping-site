@@ -1,0 +1,59 @@
+<html>
+{% extends 'collection/index.html' %} 
+{% block content %}
+<style>
+    .detail-container { background: white; padding: 40px; margin-top: 20px; border-radius: 8px; }
+    .product-main-img { max-width: 100%; max-height: 500px; object-fit: contain; }
+    .btn-orange { background-color: #ff9f00; color: white; border-radius: 2px; font-weight: bold; padding: 15px 30px; }
+    .btn-dark-orange { background-color: #fb641b; color: white; border-radius: 2px; font-weight: bold; padding: 15px 30px; }
+    .btn-orange:hover, .btn-dark-orange:hover { color: white; opacity: 0.9; }
+</style>
+
+<div class="container">
+    <div class="detail-container shadow-sm">
+        <div class="row">
+            <div class="col-md-5 text-center border-end">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" class="product-main-img" alt="{{ product.title }}">
+                {% endif %}
+            </div>
+
+            <div class="col-md-7 ps-md-5">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb small">
+                        <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+                        <li class="breadcrumb-item active">{{ product.title }}</li>
+                    </ol>
+                </nav>
+
+                <h3 class="fw-bold">{{ product.title }}</h3>
+                
+                <div class="d-flex align-items-baseline gap-2 mt-3">
+                    <h2 class="fw-bold text-dark">₹{{ product.price }}</h2>
+                    {% if product.original_price %}
+                        <del class="text-muted">₹{{ product.original_price }}</del>
+                        <span class="text-success fw-bold">{{ discount }}% off</span>
+                    {% endif %}
+                </div>
+                
+                <p class="text-muted small">Free Delivery</p>
+
+                <div class="mt-4">
+                    <h5><strong>Product Description</strong></h5>
+                    <p class="text-secondary">{{ product.description|linebreaks }}</p>
+                </div>
+
+                <div class="d-flex gap-3 mt-5">
+                    <a href="{% url 'add_to_cart' product.id %}" class="btn btn-orange flex-grow-1">
+                        <i class="fa fa-shopping-cart me-2"></i> ADD TO CART
+                    </a>
+                    <a href="{% url 'buy_now' product.id %}" class="btn btn-dark-orange flex-grow-1">
+                        <i class="fa fa-bolt me-2"></i> BUY NOW
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+</html>

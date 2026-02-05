@@ -1,0 +1,25 @@
+<hmtl>
+    {% extends 'collection/index.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <h3 class="mb-4">All Electronics Products</h3>
+    <div class="row g-4">
+        {% for prod in products %}
+        <div class="col-md-3">
+            <div class="card h-100 shadow-sm border-0 text-center p-3">
+                <img src="{{ prod.product_image.url }}" class="card-img-top mx-auto" style="height: 150px; object-fit: contain;">
+                <div class="card-body">
+                    <h6 class="card-title fw-bold text-truncate">{{ prod.title }}</h6>
+                    <p class="text-success fw-bold">₹{{ prod.selling_price }}</p>
+                    <a href="{% url 'product-detail' prod.id %}" class="btn btn-outline-primary btn-sm w-100">VIEW DETAILS</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p>No products found in Electronics.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+</html>

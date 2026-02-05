@@ -1,0 +1,61 @@
+<html>
+    {% extends "collection/index.html" %}
+
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 70vh;">
+    <div class="card shadow-lg p-4 mt-5 mb-5" style="max-width: 450px; width: 100%; border-radius: 12px; border: none;">
+        
+        <div class="text-center mb-4">
+            <i class="fa fa-user-circle fa-4x text-primary mb-2"></i>
+            <h3 class="fw-bold">Login to My-Mart</h3>
+            <p class="text-muted small">Apna username aur password daliye</p>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger p-2 small">
+                    {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="mb-3">
+                <label class="form-label small fw-bold text-secondary">Username</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="fa fa-user text-muted"></i></span>
+                    <input type="text" name="username" class="form-control border-start-0 bg-light" placeholder="Enter Username" required>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label small fw-bold text-secondary">Password</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="fa fa-lock text-muted"></i></span>
+                    <input type="password" name="password" class="form-control border-start-0 bg-light" placeholder="Enter Password" required>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" class="btn btn-primary btn-lg fw-bold shadow-sm" style="background-color: #7414a0; border: none;">
+                    LOGIN
+                </button>
+            </div>
+        </form>
+
+        <div class="text-center mt-4">
+            <p class="mb-1 small text-muted">Naye user hain? <a href="{% url 'signup' %}" class="text-primary fw-bold text-decoration-none">Create Account</a></p>
+            <a href="{% url 'index' %}" class="small text-secondary text-decoration-none"><i class="fa fa-arrow-left me-1"></i> Back to Home</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Agar form errors hain toh input fields ko red border dena
+    {% if form.errors %}
+        var inputs = document.querySelectorAll('input');
+        inputs.forEach(input => input.classList.add('is-invalid'));
+    {% endif %}
+</script>
+{% endblock %}
+</html>

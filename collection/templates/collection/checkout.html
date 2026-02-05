@@ -1,0 +1,278 @@
+<html>
+{% extends 'collection/index.html' %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+<style>
+    body { background-color: #f1f3f6; }
+    .checkout-step { background: #fff; margin-bottom: 15px; border-radius: 2px; box-shadow: 0 1px 1px 0 rgba(0,0,0,.1); }
+    .step-header { padding: 15px 25px; display: flex; align-items: center; background: #fff; }
+    .step-number { background: #f1f3f6; color: #7414a0; padding: 2px 8px; border-radius: 2px; font-weight: bold; margin-right: 15px; font-size: 12px; }
+    .step-title { color: #878787; font-weight: bold; font-size: 16px; }
+    .step-header.active { background: #7414a0; color: #fff; }
+    .step-header.active .step-title, .step-header.active .step-number { color: #fff; }
+    .btn-orange { background:  #7414a0; color: #fff; border: none; border-radius: 2px; font-weight: bold; padding: 12px 25px; width: 100%; transition: 0.3s; }
+    .btn-orange:hover { background:  #600e85; }
+    .price-details { background: #fff; border-radius: 2px; box-shadow: 0 1px 1px 0 rgba(0,0,0,.1); }
+    .payment-option-box { border: 1px solid #f0f0f0; padding: 15px; cursor: pointer; transition: 0.3s; }
+    
+    .upi-app-card { 
+        border: 1px solid #ddd; border-radius: 8px; padding: 10px; text-align: center; 
+        width: 100px; cursor: pointer; transition: 0.2s; background: white; 
+        display: inline-block; margin: 5px;
+    }
+    .upi-app-card:hover { border-color: #7414a0; background: #fdf7ff; transform: translateY(-3px); }
+    .upi-icon { width: 45px; height: 45px; object-fit: contain; margin-bottom: 5px; display: block; margin-left: auto; margin-right: auto; }
+    .upi-app-card span { font-size: 11px; font-weight: 600; color: #333; display: block; }
+    .delivery-date { font-size: 13px; color: #212121; }
+</style>
+
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="checkout-step">
+                <div class="step-header">
+                    <span class="step-number">1</span>
+                    <span class="step-title text-uppercase">Login</span>
+                    <span class="ms-auto fw-bold text-dark"><i class="bi bi-patch-check-fill text-success me-2"></i>{{ user.username|upper }}</span>
+                </div>
+            </div>
+
+            <div class="checkout-step">
+                <div class="step-header active">
+                    <span class="step-number">2</span>
+                    <span class="step-title text-uppercase">Delivery Address</span>
+                </div>
+                <div class="p-4 border-top">
+                    <form method="POST" action="{% url 'place_order' %}{% if request.session.buy_now_product_id %}?item_id={{ request.session.buy_now_product_id }}{% endif %}" id="mainOrderForm">
+                        {% csrf_token %}
+                        
+                        {% if request.session.buy_now_product_id %}
+                            <input type="hidden" name="buy_now_item" value="{{ request.session.buy_now_product_id }}">
+                        {% endif %}
+
+                        <div class="row g-3">
+                            <div class="col-md-6"><label class="small text-muted mb-1">Full Name</label><input type="text" class="form-control rounded-1" name="name" required></div>
+                            <div class="col-md-6"><label class="small text-muted mb-1">Mobile Number</label><input type="text" class="form-control rounded-1" name="phone" required></div>
+                            <div class="col-md-6"><label class="small text-muted mb-1">Pincode</label><input type="text" class="form-control rounded-1" name="pincode" required></div>
+                            <div class="col-md-6"><label class="small text-muted mb-1">Locality</label><input type="text" class="form-control rounded-1" name="locality" required></div>
+                            <div class="col-md-6"><label class="small text-muted mb-1">City</label><input type="text" class="form-control rounded-1" name="city" required></div>
+                            
+                            <div class="col-md-6">
+                                <label class="small text-muted mb-1">State</label>
+                                <select class="form-select rounded-1" name="state" required>
+                                    <option value="" selected disabled>Select State</option>
+                                    <option value="Andhra Pradesh">Andhra Pradesh</option>
+                                    <option value="Bihar">Bihar</option>
+                                    <option value="Delhi">Delhi</option>
+                                    <option value="Madhya Pradesh">Madhya Pradesh</option>
+                                    <option value="Maharashtra">Maharashtra</option>
+                                    <option value="Rajasthan">Rajasthan</option>
+                                    <option value="Uttar Pradesh">Uttar Pradesh</option>
+                                    <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                                    <option value="Assam">Assam</option>
+                                    <option value="Chhattisgarh">Chhattisgarh</option>
+                                    <option value="Goa">Goa</option>
+                                    <option value="Gujarat">Gujarat</option>
+                                    <option value="Haryana">Haryana</option>
+                                    <option value="Himachal Pradesh">Himachal Pradesh</option>
+                                    <option value="Jharkhand">Jharkhand</option>
+                                    <option value="Karnataka">Karnataka</option>
+                                    <option value="Kerala">Kerala</option>
+                                    <option value="Manipur">Manipur</option>
+                                    <option value="Meghalaya">Meghalaya</option>
+                                    <option value="Mizoram">Mizoram</option>
+                                    <option value="Nagaland">Nagaland</option>
+                                    <option value="Odisha">Odisha</option>
+                                    <option value="Punjab">Punjab</option>
+                                    <option value="Sikkim">Sikkim</option>
+                                    <option value="Tamil Nadu">Tamil Nadu</option>
+                                    <option value="Telangana">Telangana</option>
+                                    <option value="Tripura">Tripura</option>
+                                    <option value="Uttarakhand">Uttarakhand</option>
+                                    <option value="West Bengal">West Bengal</option>
+                                    <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+                                    <option value="Chandigarh">Chandigarh</option>
+                                    <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+                                    <option value="Ladakh">Ladakh</option>
+                                    <option value="Lakshadweep">Lakshadweep</option>
+                                    <option value="Puducherry">Puducherry</option>
+                                </select>
+                            </div>
+
+                            <div class="col-12"><label class="small text-muted mb-1">Full Address</label><textarea class="form-control rounded-1" name="address" rows="2" required></textarea></div>
+
+                            <div class="col-12 mt-4">
+                                <div class="card shadow-sm border-0 rounded-1 mb-3" style="margin-left: -25px; margin-right: -25px;">
+                                    <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                                        <h5 class="mb-0 fw-bold text-muted"><span class="step-number" style="margin-right: 10px;">3</span> ORDER SUMMARY</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        {% for item in items %}
+                                        <div class="row mb-4 align-items-center">
+                                            <div class="col-md-2 text-center">
+                                                <img src="{{ item.product.image.url }}" class="img-fluid" style="max-height: 80px; object-fit: contain;">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h6 class="fw-bold mb-1">{{ item.product.name }}</h6>
+                                                <p class="small text-muted mb-1">Seller: My-Mart Assured</p>
+                                                <div class="d-flex align-items-center gap-2 mb-2">
+                                                    <span class="fw-bold">₹{{ item.product.selling_price }}</span>
+                                                    <span class="text-muted text-decoration-line-through small">₹{{ item.product.original_price }}</span>
+                                                    <span class="text-success small fw-bold">{{ item.product.get_discount_percent }}% Off</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 text-md-end">
+                                                <p class="delivery-date mb-1"><i class="bi bi-truck me-2"></i>Delivery by <span class="fw-bold" id="est-date-{{ forloop.counter }}"></span></p>
+                                                <p class="small text-muted">Free Delivery <span class="text-decoration-line-through">₹40</span></p>
+                                            </div>
+                                        </div>
+                                        <hr class="text-muted opacity-25">
+                                        {% endfor %}
+                                        <div class="d-flex justify-content-between align-items-center mt-3">
+                                            <p class="mb-0 small text-muted">Order confirmation email will be sent to <strong>{{ request.user.email }}</strong></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 mt-4">
+                                <div class="step-header active mb-3" style="margin-left: -25px; margin-right: -25px;">
+                                    <span class="step-number">4</span>
+                                    <span class="step-title text-uppercase">Payment Options</span>
+                                </div>
+                                
+                                <div class="payment-options">
+                                    <div class="payment-option-box mb-2 border rounded p-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="payment_mode" id="upi" value="UPI" onclick="togglePayment('upi')">
+                                            <label class="form-check-label fw-bold" for="upi">UPI (G-Pay / PhonePe / Paytm / Amazon Pay)</label>
+                                        </div>
+                                        
+                                        <div id="upi_details" style="display:none;" class="mt-3 p-3 bg-light rounded text-center">
+                                            <p class="small text-muted fw-bold mb-3">Click Icon to Pay via Mobile App:</p>
+                                            <div class="d-flex flex-wrap justify-content-center">
+                                                <div class="upi-app-card" onclick="handleUPIClick('Google Pay')">
+                                                    <img src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Google_Pay_Logo.svg" class="upi-icon" alt="GPay">
+                                                    <span>G-Pay</span>
+                                                </div>
+                                                <div class="upi-app-card" onclick="handleUPIClick('PhonePe')">
+                                                    <img src="https://img.icons8.com/color/100/phonepe.png" class="upi-icon" alt="PhonePe">
+                                                    <span>PhonePe</span>
+                                                </div>
+                                                <div class="upi-app-card" onclick="handleUPIClick('Paytm')">
+                                                    <img src="https://img.icons8.com/color/100/paytm.png" class="upi-icon" alt="Paytm">
+                                                    <span>Paytm</span>
+                                                </div>
+                                                <div class="upi-app-card" onclick="handleUPIClick('Amazon Pay')">
+                                                    <img src="https://img.icons8.com/color/100/amazon-pay.png" class="upi-icon" alt="Amazon Pay">
+                                                    <span>Amazon Pay</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="mt-3 pt-3 border-top">
+                                                <p class="small text-muted mb-2">OR Scan QR with any App</p>
+                                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=dikshamourya20@okaxis%26pn=Diiksha%26am={{ total_amount|add:7 }}%26cu=INR" class="img-fluid border p-2 bg-white">
+                                                <p class="fw-bold text-primary mt-2 mb-0">UPI ID: dikshamourya20@okaxis</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="payment-option-box mb-2 border rounded p-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="payment_mode" id="cod" value="COD" checked onclick="togglePayment('cod')">
+                                            <label class="form-check-label fw-bold" for="cod">Cash on Delivery</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 mt-4">
+                                <button type="submit" class="btn btn-orange text-uppercase py-3">Confirm Order</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="price-details sticky-top" style="top: 20px;">
+                <div class="p-3 border-bottom"><h6 class="text-muted fw-bold mb-0 text-uppercase">Price Details</h6></div>
+                <div class="p-3">
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Price ({{ count }} item{% if count > 1 %}s{% endif %})</span>
+                        <span>₹{{ total_mrp|floatformat:2 }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Discount</span>
+                        <span class="text-success">- ₹{{ total_discount|floatformat:2 }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3"><span>Delivery Charges</span><span class="text-success">FREE</span></div>
+                    <div class="d-flex justify-content-between mb-3"><span>Packaging Fee</span><span>₹7</span></div>
+                    <hr style="border-top: 1px dashed #bbb;">
+                    <div class="d-flex justify-content-between mb-3 fw-bold fs-5">
+                        <span>Total Payable</span>
+                        <span>₹{{ total_amount|add:7|floatformat:2 }}</span>
+                    </div>
+                    <hr style="border-top: 1px dashed #bbb;">
+                    <p class="text-success mb-0 fw-bold small">You will save ₹{{ total_discount|floatformat:2 }} on this order</p>
+                </div>
+                <div class="p-3 bg-light border-top text-center">
+                    <p class="text-success fw-bold mb-0 small"><i class="bi bi-shield-lock-fill me-2"></i> 100% Safe & Secure Payments</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="qrModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content text-center p-3">
+        <h6 class="fw-bold mb-3" id="appName">Scan to Pay</h6>
+        <img src="" id="modalQR" class="img-fluid border p-2 mb-2">
+        <p class="fw-bold text-primary small">UPI ID: dikshamourya20@okaxis</p>
+        <button type="button" class="btn btn-sm btn-secondary mt-2" data-bs-dismiss="modal">Close</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const MY_UPI_ID = "dikshamourya20@okaxis"; 
+    const TOTAL_PAYABLE = "{{ total_amount|add:7 }}";
+
+    // Estimated Delivery Date Logic
+    document.addEventListener("DOMContentLoaded", function() {
+        const options = { weekday: 'short', month: 'short', day: 'numeric' };
+        const today = new Date();
+        const deliveryDate = new Date(today);
+        deliveryDate.setDate(today.getDate() + 4); // डिलीवरी के लिए 4 दिन जोड़ें
+        
+        const formattedDate = deliveryDate.toLocaleDateString('en-IN', options);
+        
+        // सभी आइटम की डिलीवरी डेट अपडेट करें
+        {% for item in items %}
+            document.getElementById("est-date-{{ forloop.counter }}").innerText = formattedDate;
+        {% endfor %}
+    });
+
+    function togglePayment(type) {
+        document.getElementById('upi_details').style.display = (type === 'upi') ? 'block' : 'none';
+    }
+
+    function handleUPIClick(appName) {
+        const upiLink = `upi://pay?pa=${MY_UPI_ID}&pn=Diiksha&am=${TOTAL_PAYABLE}&cu=INR`;
+        if (/Android|iPhone|iPad/i.test(navigator.userAgent)) {
+            window.location.href = upiLink;
+        } else {
+            document.getElementById('appName').innerText = "Pay via " + appName;
+            document.getElementById('modalQR').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiLink)}`;
+            new bootstrap.Modal(document.getElementById('qrModal')).show();
+        }
+    }
+</script>
+{% endblock %}
+</html>
+

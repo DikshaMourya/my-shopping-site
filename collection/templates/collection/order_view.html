@@ -1,0 +1,194 @@
+<html>
+{% extends 'collection/index.html' %}
+{% block content %}
+
+<style>
+    /* Chalti Gaadi aur Bike ki Animation */
+    .delivery-anim {
+        display: inline-block;
+        animation: drive-smooth 2s infinite linear;
+    }
+    @keyframes drive-smooth {
+        0% { transform: translateX(-2px); }
+        50% { transform: translateX(3px); }
+        100% { transform: translateX(-2px); }
+    }
+    /* Status tracking dots customization */
+    .step-icon-custom {
+        width: 30px; 
+        height: 30px; 
+        line-height: 30px;
+        display: inline-block;
+        border-radius: 50%;
+    }
+</style>
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold">Order Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <p class="text-muted small mb-1">Order ID</p>
+                            <h6 class="fw-bold">#MMORD{{ order.id }}</h6>
+                        </div>
+                        <div class="col-6 text-end">
+                            <p class="text-muted small mb-1">Status</p>
+                            <span class="badge 
+                                {% if order.status == 'Pending' %}bg-warning text-dark
+                                {% elif order.status == 'Delivered' %}bg-success
+                                {% elif order.status == 'Cancelled' %}bg-danger
+                                {% else %}bg-primary{% endif %}">
+                                {{ order.status }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4 border-0">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h5 class="mb-0 fw-bold">Track Your Shipment</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between position-relative mb-5 mt-3">
+                        <div class="text-center" style="width: 25%; z-index: 2;">
+                            <div class="step-icon-custom bg-success text-white shadow-sm">✓</div>
+                            <p class="small fw-bold mt-2 mb-0">Placed</p>
+                        </div>
+                        <div class="text-center" style="width: 25%; z-index: 2;">
+                            <div class="step-icon-custom {% if order.status == 'Shipped' or order.status == 'Out for Delivery' or order.status == 'Delivered' %}bg-success text-white shadow-sm{% else %}bg-light text-muted border{% endif %}">
+                                {% if order.status == 'Shipped' %}
+                                    <i class="fas fa-truck delivery-anim"></i>
+                                {% elif order.status == 'Out for Delivery' or order.status == 'Delivered' %}
+                                    ✓
+                                {% else %}
+                                    2
+                                {% endif %}
+                            </div>
+                            <p class="small mt-2 mb-0 {% if order.status == 'Shipped' or order.status == 'Out for Delivery' or order.status == 'Delivered' %}fw-bold text-dark{% else %}text-muted{% endif %}">Shipped</p>
+                        </div>
+                        <div class="text-center" style="width: 25%; z-index: 2;">
+                            <div class="step-icon-custom {% if order.status == 'Out for Delivery' or order.status == 'Delivered' %}bg-success text-white shadow-sm{% else %}bg-light text-muted border{% endif %}">
+                                {% if order.status == 'Out for Delivery' %}
+                                    <i class="fas fa-motorcycle delivery-anim"></i>
+                                {% elif order.status == 'Delivered' %}
+                                    ✓
+                                {% else %}
+                                    3
+                                {% endif %}
+                            </div>
+                            <p class="small mt-2 mb-0 {% if order.status == 'Out for Delivery' or order.status == 'Delivered' %}fw-bold text-dark{% else %}text-muted{% endif %}">Out for Delivery</p>
+                        </div>
+                        <div class="text-center" style="width: 25%; z-index: 2;">
+                            <div class="step-icon-custom {% if order.status == 'Delivered' %}bg-success text-white shadow-sm{% else %}bg-light text-muted border{% endif %}">
+                                {% if order.status == 'Delivered' %}✓{% else %}4{% endif %}
+                            </div>
+                            <p class="small mt-2 mb-0 {% if order.status == 'Delivered' %}fw-bold text-dark{% else %}text-muted{% endif %}">Delivered</p>
+                        </div>
+                        <div class="position-absolute bg-light" style="height: 4px; width: 80%; top: 13px; left: 10%; z-index: 1;"></div>
+                    </div>
+                    
+                    <div class="p-3 rounded border-start border-success border-4" style="background-color: #f8f9fa;">
+                        <h6 class="mb-1 fw-bold text-dark">Current Shipping Status:</h6>
+                        <p class="mb-0 text-success fw-bold">
+                            <i class="bi bi-geo-alt-fill"></i> 
+                            {% if order.current_location %}{{ order.current_location }}{% else %}Package is being processed at the hub{% endif %}
+                        </p>
+                        <small class="text-muted">Last updated: {{ order.updated_at|date:"d M, Y" }} | {{ order.updated_at|time:"H:i A" }}</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        {% if order.product.image %}
+                            <img src="{{ order.product.image.url }}" alt="{{ order.product.name }}" style="width: 100px; height: 100px; object-fit: contain;" class="me-3 border rounded p-1">
+                        {% else %}
+                            <div class="me-3 border rounded p-1 bg-light text-center" style="width: 100px; height: 100px; line-height: 100px; font-size: 12px;">No Image</div>
+                        {% endif %}
+                        
+                        <div class="flex-grow-1">
+                            <h6 class="fw-bold mb-1">{{ order.product.name }}</h6>
+                            <p class="text-muted small mb-1">Quantity: {{ order.quantity }}</p>
+                            <p class="fw-bold text-primary mb-0">₹{{ order.product.selling_price }}</p>
+                        </div>
+
+                        {% if order.status == 'Pending' %}
+                            <div class="ms-auto">
+                                <a href="{% url 'cancel_order' order.id %}" 
+                                   class="btn btn-sm btn-outline-danger" 
+                                   onclick="return confirm('Kya aap sach mein order cancel karna chahte hain?')">
+                                   Cancel Order
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold">Shipping Address</h5>
+                </div>
+                <div class="card-body">
+                    {% if order.customer %}
+                        <h6 class="fw-bold">{{ order.customer.name }}</h6>
+                        <p class="text-muted mb-1">
+                            {{ order.customer.address }}<br>
+                            {{ order.customer.city }} - {{ order.customer.pincode }}
+                        </p>
+                        <p class="mt-2 mb-0"><strong>Phone:</strong> {{ order.customer.phone }}</p>
+                    {% else %}
+                        <p class="text-danger mb-0">Address details not found.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold">Price Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Subtotal ({{ order.quantity }} item)</span>
+                        <span>₹{{ order.product.selling_price }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2 text-success">
+                        <span class="text-muted">Shipping</span>
+                        <span>FREE</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Platform Fee</span>
+                        <span>₹7.00</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between fw-bold fs-5 mb-4">
+                        <span>Total</span>
+                        <span class="text-dark">₹{{ order.total_amount }}</span>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        {% if order.status == 'Delivered' %}
+                        <a href="{% url 'download_invoice' order.id %}" class="btn btn-success shadow-sm">
+                            <i class="bi bi-file-earmark-pdf-fill"></i> Download Invoice
+                        </a>
+                        {% endif %}
+                        
+                        <a href="{% url 'my_orders' %}" class="btn btn-light border">Back to My Orders</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+</html>

@@ -1,0 +1,42 @@
+<html>
+    {% extends 'collection/index.html' %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5 text-center">
+            <div class="card shadow border-0 p-4">
+                <h4 class="fw-bold mb-4">UPI Payment</h4>
+                
+                <div class="bg-light p-3 mb-4 rounded">
+                    <p class="small text-muted">Scan this QR Code to Pay</p>
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=your-vpa@upi&pn=MyMart&am={{ total_amount }}&cu=INR" alt="QR Code">
+                    <h3 class="mt-3">₹{{ total_amount }}</h3>
+                </div>
+
+                <p class="text-muted">OR</p>
+
+                <div class="alert alert-warning py-2 small">
+                    Complete payment within <span id="timer">05:00</span>
+                </div>
+
+                <form action="{% url 'order_success_page' %}" method="GET">
+                    <p class="small">After payment, click below:</p>
+                    <button type="submit" class="btn btn-primary w-100 fw-bold py-2">I HAVE PAID</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 5 Minute ka timer
+    var time = 300;
+    setInterval(function() {
+        var min = Math.floor(time / 60);
+        var sec = time % 60;
+        document.getElementById('timer').innerHTML = min + ":" + (sec < 10 ? '0' : '') + sec;
+        if(time > 0) time--;
+    }, 1000);
+</script>
+{% endblock %}
+</html>
