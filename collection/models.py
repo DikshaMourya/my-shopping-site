@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User # Django ka inbuilt User system
 from django.utils.text import slugify
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 # 1. Category Model (Mobile, Fashion, Electronics etc.)
 class Category(models.Model):
@@ -18,7 +20,6 @@ class Category(models.Model):
         return self.name
 
 # 2. Product Model (Asli Product ki details)
-from django.db import models
 
 class Product(models.Model):
     category = models.ForeignKey('Category', on_delete=models.CASCADE, related_name='products')
@@ -54,10 +55,10 @@ class Product(models.Model):
 class Customer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE) # Login details ke liye
     name = models.CharField(max_length=200)
-    phone = models.CharField(max_length=15)
-    address = models.TextField()
-    city = models.CharField(max_length=100)
-    pincode = models.IntegerField()
+    phone = models.CharField(max_length=15, null=True, blank=True)
+    address = models.TextField(null=True, blank=True)
+    city = models.CharField(max_length=100, null=True, blank=True)
+    pincode = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
         return self.user.username
@@ -142,5 +143,17 @@ class Wishlist(models.Model):
 
     class Meta:
         unique_together = ('user', 'product') # Ek user ek product ko ek hi baar add kar sake
+
+@receiver(post_save, sender=User)
+def create_customer_profile(sender, instance, created, **kwargs):
+    if created:
+        # Jab naya user banega, ye automatically uska customer record bana dega
+        Customer.objects.create(
+            user=instance, 
+            name=instance.username, 
+            email=instance.email
+        )
+    
+
 
 
