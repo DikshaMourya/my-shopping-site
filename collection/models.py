@@ -151,7 +151,6 @@ def create_customer_profile(sender, instance, created, **kwargs):
         Customer.objects.create(
             user=instance, 
             name=instance.username, 
-            email=instance.email
         )
     
 
