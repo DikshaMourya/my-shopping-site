@@ -75,21 +75,51 @@ class Order(models.Model):
         ('Delivered', 'Delivered'),
         ('Cancelled', 'Cancelled'),
     ]
+    
+    # Nayi choices payment ke liye
+    PAYMENT_METHOD_CHOICES = [
+        ('COD', 'Cash on Delivery'),
+        ('UPI', 'UPI / QR Code'),
+        ('Card', 'Debit/Credit Card'),
+        ('NetBanking', 'Net Banking'),
+    ]
+
+    PAYMENT_STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('Paid', 'Success / Paid'),
+        ('Failed', 'Failed'),
+    ]
+    
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
     # Ye nayi field add karein
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='Pending')
+    # --- Payment Fields ---
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES, default='COD')
+    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='Pending')
+    # Transaction ID (Agar online payment gateway use kar rahe ho toh)
+    transaction_id = models.CharField(max_length=100, null=True, blank=True)
     current_location = models.CharField(max_length=255, default="Seller Warehouse")
     expected_delivery = models.DateField(null=True, blank=True)
     tracking_id = models.CharField(max_length=100, null=True, blank=True)
     
+    
     ordered_date = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True) # Status change ka time track karne ke liye
     
+    def save(self, *args, **kwargs):
+        # Agar order deliver ho chuka hai, toh payment status ko 'Paid' kar do
+        if self.status == 'Delivered':
+            self.payment_status = 'Paid'
+        
+        # Original save method ko call karna zaroori hai
+        super().save(*args, **kwargs)
+    
     def __str__(self):
-        return f"Order {self.id} - {self.status}"
+        return f"Order {self.id} | {self.payment_status} | {self.status}"
+        
     
 class Banner(models.Model):
     title = models.CharField(max_length=100)
@@ -150,7 +180,7 @@ def create_customer_profile(sender, instance, created, **kwargs):
         # Jab naya user banega, ye automatically uska customer record bana dega
         Customer.objects.create(
             user=instance, 
-            name=instance.username, 
+            name=instance.username
         )
     
 
