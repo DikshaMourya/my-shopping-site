@@ -291,26 +291,49 @@ def calculate_total(cart_items):
     packaging_fee = 7 
     return total + packaging_fee
 
+@login_required
 def place_order(request):
     if request.method == 'POST':
-        cart_items = CartItem.objects.filter(user=request.user)
-        customer = Customer.objects.get(user=request.user)
+        # 1. HTML Form se data nikaalna (Jo aapne name="address" etc diya hai)
+        f_name = request.POST.get('name')
+        f_phone = request.POST.get('phone')
+        f_pincode = request.POST.get('pincode')
+        f_address = request.POST.get('address')
+        f_locality = request.POST.get('locality')
+        f_city = request.POST.get('city')
+        f_state = request.POST.get('state')
 
+        # Pura address ek sath jodein
+        full_address_string = f"{f_address}, {f_locality}, {f_city}, {f_state}"
+
+        cart_items = CartItem.objects.filter(user=request.user)
+        if not cart_items.exists():
+            return redirect('cart')
+
+        # 2. Customer profile update karein (Taaki '0' hat jaye)
+        customer, created = Customer.objects.get_or_create(user=request.user)
+        customer.address = request.POST.get('address')
+        customer.pincode = request.POST.get('pincode')
+        customer.phone = request.POST.get('phone')
+        customer.save()
+
+        # 3. Order save karein
         for item in cart_items:
-            # Calculation: price * quantity + packing fee (Rs 7)
-            price_for_this_item = (item.product.selling_price * item.quantity) + 7
-            
             Order.objects.create(
-    customer=customer,
-    product=item.product,
-    quantity=item.quantity,
-    total_amount=(item.product.selling_price * item.quantity) + 7,
-    status='Pending'
-)
+                customer=customer,
+                product=item.product,
+                quantity=item.quantity,
+                total_amount=(item.product.selling_price * item.quantity) + 7,
+                status='Pending'
+            )
         
+        # 4. Cart khali karein
         cart_items.delete()
+        
         return redirect('order_success_page')
 
+    return redirect('checkout')
+    
 def order_success(request):
     # Agar aap count dikhana chahte hain toh yahan se bhejna hoga
     # Filhal hum zero ya koi fixed value bhej dete hain error hatane ke liye
@@ -325,16 +348,22 @@ def order_success(request):
     }
     return render(request, 'collection/success.html', context)
 
+@login_required
 def my_orders(request):
-    if request.user.is_authenticated:
-        # 'customer__user' use karein jo Order -> Customer -> User tak jata hai
-        orders = Order.objects.filter(customer__user=request.user).order_by('-ordered_date')
-    else:
-        orders = []
+    """
+    Login kiye hue user ke orders ko dikhane ke liye merged aur clean function.
+    """
+    # 1. Filter: Order table mein jayenge, wahan se Customer aur phir User tak pahunchenge
+    # Isse sirf wahi orders dikhenge jo is logged-in user ne kiye hain.
+    orders = Order.objects.filter(customer__user=request.user).order_by('-ordered_date')
     
-    # PEHLE: return render(request, 'your_template_name.html', {'orders': orders})
-    # AB: Sahi path likhein
-    return render(request, 'collection/my_orders.html', {'orders': orders})
+    # 2. Context: Template ko data bhej rahe hain
+    context = {
+        'orders': orders
+    }
+    
+    # 3. Render: Sahi path par return kar rahe hain
+    return render(request, 'collection/my_orders.html', context)
 
 @login_required
 def order_view(request, t_id):
@@ -431,3 +460,10 @@ def offer_zone_view(request):
     # केवल वो प्रोडक्ट्स जहाँ Selling Price, MRP से कम है
     products = Product.objects.filter(selling_price__lt=F('original_price'))
     return render(request, 'index.html', {'products': products})
+
+def cart_count(request):
+    if request.user.is_authenticated:
+        count = CartItem.objects.filter(user=request.user).count()
+    else:
+        count = 0
+    return {'cart_count': count}

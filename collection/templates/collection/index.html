@@ -121,7 +121,7 @@
                 <a href="{% url 'view_cart' %}" class="text-white text-decoration-none fw-bold d-flex align-items-center gap-1 me-3">
                     <div class="cart-wrapper">
                         <i class="fas fa-shopping-cart"></i>
-                        <span class="cart-badge" id="cart-count">{{ cart_count|default:0 }}</span>
+                        <span class="cart-badge" id="cart-count">{{ cart_count }}</span>
                     </div>
                     <span class="d-none d-md-inline">Cart</span>
                 </a>
