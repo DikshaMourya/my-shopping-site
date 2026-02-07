@@ -196,28 +196,31 @@ def logout_view(request):
     logout(request)
     messages.success(request, "You have been logged out successfully.")
     return redirect('login') # Logout ke baad login page par bhej dein
+
 @login_required
 def checkout(request):
-    # 1. Check karein ki URL me item_id hai ya Session me buy_now_product_id hai
-    buy_now_id = request.GET.get('item_id') or request.session.get('buy_now_product_id')
+    # 1. Sabse pehle check karein ki kya URL mein prod_id (Cart se) ya item_id (Buy Now se) hai
+    buy_now_id = request.GET.get('prod_id') or request.GET.get('item_id') or request.session.get('buy_now_product_id')
     
     items = []
     total_mrp = 0
     total_amount = 0
+    count = 0
 
     if buy_now_id:
-        # --- BUY NOW CASE (Sirf ek item ke liye) ---
+        # --- SINGLE ITEM CASE ---
         product = get_object_or_404(Product, id=buy_now_id)
         
-        # Ek "Fake" list banayein taaki template ka loop chale
+        # Ek dictionary banayein jo CartItem ki tarah behave kare taaki template na phate
+        # Humne 'product.price' ko 'product.original_price' se replace kiya hai agar aapke model mein wo naam hai
         items = [{
             'product': product,
             'quantity': 1,
             'total_price': product.selling_price
         }]
         
-        # Yahan sirf isi ek product ki price count hogi
-        total_mrp = product.price
+        # Agar aapke model mein 'price' ki jagah 'original_price' hai toh niche wo use karein
+        total_mrp = getattr(product, 'original_price', product.price) 
         total_amount = product.selling_price
         count = 1
         
@@ -230,15 +233,17 @@ def checkout(request):
             
         items = cart_items
         # Poore cart ki calculation
-        total_mrp = sum(item.product.price * item.quantity for item in items)
+        total_mrp = sum((getattr(item.product, 'original_price', item.product.price)) * item.quantity for item in items)
         total_amount = sum(item.product.selling_price * item.quantity for item in items)
         count = cart_items.count()
 
     # Common Logic for Discount
     total_discount = total_mrp - total_amount
 
-    # POST Logic (Address Saving) same rahega...
-    # ... (Aapka purana POST code) ...
+    # Agar request POST hai (Address save karne ke liye) toh purana logic yahan aayega
+    if request.method == 'POST':
+        # ... (Aapka address saving wala purana code yahan rakhein) ...
+        pass
 
     context = {
         'items': items,
@@ -246,7 +251,7 @@ def checkout(request):
         'total_amount': total_amount,
         'total_discount': total_discount,
         'count': count,
-        'item_id': buy_now_id,
+        'item_id': buy_now_id, # Isse place_order ko pata chalega ki single item hai
     }
     return render(request, 'collection/checkout.html', context)
 
@@ -294,42 +299,70 @@ def calculate_total(cart_items):
 @login_required
 def place_order(request):
     if request.method == 'POST':
-        # 1. HTML Form se data nikaalna (Jo aapne name="address" etc diya hai)
+        # Dono jagah se check karein: form input aur session
+        buy_now_id = request.POST.get('product_id') or request.session.get('buy_now_product_id')
+
+        # Form data collect karna (Same as your code)
         f_name = request.POST.get('name')
         f_phone = request.POST.get('phone')
         f_pincode = request.POST.get('pincode')
-        f_address = request.POST.get('address')
         f_locality = request.POST.get('locality')
         f_city = request.POST.get('city')
         f_state = request.POST.get('state')
+        f_address = request.POST.get('address')
 
-        # Pura address ek sath jodein
-        full_address_string = f"{f_address}, {f_locality}, {f_city}, {f_state}"
-
-        cart_items = CartItem.objects.filter(user=request.user)
-        if not cart_items.exists():
-            return redirect('view_cart')
-
-        # 2. Customer profile update karein (Taaki '0' hat jaye)
         customer, created = Customer.objects.get_or_create(user=request.user)
-        customer.address = request.POST.get('address')
-        customer.pincode = request.POST.get('pincode')
-        customer.phone = request.POST.get('phone')
+        # ... (customer details save karne ka aapka logic) ...
+        customer.name = f_name
+        customer.phone = f_phone
+        customer.pincode = f_pincode
+        customer.locality = f_locality
+        customer.city = f_city
+        customer.state = f_state
+        customer.address = f_address
         customer.save()
 
-        # 3. Order save karein
-        for item in cart_items:
-            Order.objects.create(
-                customer=customer,
-                product=item.product,
-                quantity=item.quantity,
-                total_amount=(item.product.selling_price * item.quantity) + 7,
-                status='Pending'
-            )
-        
-        # 4. Cart khali karein
-        cart_items.delete()
-        
+        with transaction.atomic():
+            # Yahan humne "if buy_now_id and buy_now_id != ''" check kiya hai
+            if buy_now_id and str(buy_now_id).strip() != 'None' and str(buy_now_id).strip() != '':
+                # --- CASE 1: BUY NOW / SINGLE ITEM ---
+                product = get_object_or_404(Product, id=buy_now_id)
+                
+                # Check karein ki ye product cart mein hai kya?
+                cart_item = CartItem.objects.filter(user=request.user, product=product).first()
+                qty = cart_item.quantity if cart_item else 1
+
+                Order.objects.create(
+                    customer=customer,
+                    product=product,
+                    quantity=qty,
+                    total_amount=(product.selling_price * qty) + 7,
+                    status='Pending'
+                )
+                
+                # IMPORTANT: Sirf is product ko cart se hatayein
+                if cart_item:
+                    cart_item.delete()
+                
+                if 'buy_now_product_id' in request.session:
+                    del request.session['buy_now_product_id']
+            
+            else:
+                # --- CASE 2: CART CHECKOUT (BUY ALL) ---
+                cart_items = CartItem.objects.filter(user=request.user)
+                if not cart_items.exists():
+                    return redirect('view_cart')
+
+                for item in cart_items:
+                    Order.objects.create(
+                        customer=customer,
+                        product=item.product,
+                        quantity=item.quantity,
+                        total_amount=(item.product.selling_price * item.quantity) + 7,
+                        status='Pending'
+                    )
+                cart_items.delete()
+
         return redirect('order_success_page')
 
     return redirect('checkout')
