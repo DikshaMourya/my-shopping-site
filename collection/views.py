@@ -308,7 +308,7 @@ def place_order(request):
 
         cart_items = CartItem.objects.filter(user=request.user)
         if not cart_items.exists():
-            return redirect('view_cart')
+            return redirect('cart')
 
         # 2. Customer profile update karein (Taaki '0' hat jaye)
         customer, created = Customer.objects.get_or_create(user=request.user)
