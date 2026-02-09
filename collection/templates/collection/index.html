@@ -10,11 +10,11 @@
     
     <style>
         /* AAPKI ORIGINAL STYLING */
-        body { background-color: #1984a5bd; font-family: 'Roboto', sans-serif; }
+        body { background-color: rgba(246, 246, 247, 0.96); font-family: 'Roboto', sans-serif; }
         .navbar { background-color: #7414a0; padding: 10px 0; } 
-        .category-container { background: white; border-bottom: 1px solid #ddd; position: relative; z-index: 10; }
+        .category-container { background: white; border-bottom: 1px solid #ddd; }
         .category-img { width: 64px; height: 64px; object-fit: contain; }
-        .category-item { text-decoration: none; color: #212121; transition: 0.2s; border-bottom: 3px solid transparent; padding-bottom: 5px; display: block; }
+        .category-item { text-decoration: none; color: #212121; transition: 0.2s; border-bottom: 3px solid transparent; padding-bottom: 5px; }
         .category-item:hover { color: #7414a0; }
         .product-card { background: white; border: none; transition: 0.3s; height: 100%; border-radius: 4px; text-decoration: none !important; display: block; position: relative; }
         .product-card:hover { transform: scale(1.02); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
@@ -37,13 +37,11 @@
         .bottom-nav a i { font-size: 20px; margin-bottom: 2px; }
         .bottom-nav a.active { color: #7414a0; }
 
+        /* OFFER ZONE PREMIUM COLOR */
         .offer-zone-btn i { color: #ff3d00 !important; }
         .offer-zone-btn span { color: #ff3d00 !important; font-weight: 800; }
 
-        @media (max-width: 991px) { 
-            body { padding-bottom: 70px; } 
-            .category-row { flex-nowrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        }
+        @media (max-width: 991px) { body { padding-bottom: 70px; } }
         #wishlist-message { display: none; position: fixed; top: 80px; right: 20px; background: #28a745; color: white; padding: 12px 25px; border-radius: 8px; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-weight: bold; }
 
         .no-product-card { background: white; padding: 40px; border-radius: 10px; text-align: center; width: 100%; margin: 20px 0; }
@@ -150,11 +148,11 @@
 
     <div class="category-container mb-3 shadow-sm">
         <div class="container">
-            <div class="d-flex category-row py-2 text-center justify-content-lg-center">
+            <div class="row text-center py-2 flex-nowrap overflow-auto">
                 {% for cat in categories %}
-                <div class="px-3 px-lg-4">
-                    <a href="{% url 'product_list_by_category' cat.slug %}" class="category-item">
-                        {% if cat.image %}<img src="{{ cat.image.url }}" class="category-img d-block mx-auto">{% endif %}
+                <div class="col px-4">
+                    <a href="{% url 'product_list_by_category' cat.slug %}" class="category-item d-block">
+                        {% if cat.image %}<img src="{{ cat.image.url }}" class="category-img">{% endif %}
                         <p class="small fw-bold mb-0 mt-1 text-nowrap">{{ cat.name }}</p>
                     </a>
                 </div>
