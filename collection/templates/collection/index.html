@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     
     <style>
-        /* AAPKI ORIGINAL STYLING */
+        /* AAPKI ORIGINAL STYLING - NO CHANGES */
         body { background-color: #fefffff5; font-family: 'Roboto', sans-serif; }
         .navbar { background-color: #7414a0; padding: 10px 0; } 
         .category-container { background: white; border-bottom: 1px solid #ddd; }
@@ -37,7 +37,6 @@
         .bottom-nav a i { font-size: 20px; margin-bottom: 2px; }
         .bottom-nav a.active { color: #7414a0; }
 
-        /* OFFER ZONE PREMIUM COLOR */
         .offer-zone-btn i { color: #ff3d00 !important; }
         .offer-zone-btn span { color: #ff3d00 !important; font-weight: 800; }
 
@@ -47,6 +46,16 @@
         .no-product-card { background: white; padding: 40px; border-radius: 10px; text-align: center; width: 100%; margin: 20px 0; }
         .nav-link-custom { color: white !important; font-weight: bold; text-decoration: none; font-size: 14px; }
         .nav-link-custom:hover { opacity: 0.8; }
+
+        /* --- YE EXTRA LINE HAI MOBILE FIX KE LIYE --- */
+        @media (max-width: 768px) {
+            .navbar .container { flex-wrap: wrap; }
+            #searchForm { order: 3; width: 100%; margin-top: 10px !important; }
+            .navbar-brand { font-size: 1.3rem !important; }
+            .row-cols-1 { display: flex !important; flex-wrap: wrap; }
+            .row-cols-1 .col { width: 50% !important; } /* Mobile par 2 product dikhenge */
+            .product-img-container { height: 150px; }
+        }
     </style>
 </head>
 <body>
